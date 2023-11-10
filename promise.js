@@ -55,3 +55,20 @@ class fakePromise {
 }
 
 
+fakePromise.all = function(promises){
+  return new fakePromise((resolve,reject) => {
+    let results = [];
+    let completed = 0;
+    promises.forEach((value, index) => {
+       fakePromise.resolve(value).then(result =>{
+        results[index] = result;
+        completed++;
+        if(completed === promises.length){
+          resolve(results);
+        }
+       }).catch(error => reject(error))
+    })
+  })
+}
+
+
