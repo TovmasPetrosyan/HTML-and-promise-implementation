@@ -90,3 +90,11 @@ const promises = promisesArray.map(promise => {
 return fakePromise.all(promises);
 };
 
+
+fakePromise.race = function(promisesArray){
+return new fakePromise((resolve,reject) => {
+  promisesArray.forEach(promise => {
+    promise.then(value => resolve(value)).catch(reason => reject(reason))
+  })
+})
+}
