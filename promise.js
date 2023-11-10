@@ -28,19 +28,20 @@ class fakePromise {
 
     }
 
-    then(Fulfilled,Rejected){
-        switch (this.state){
-            case 'fulfilled':
-            onFulfilled(this.value);
-            break;
-            case 'rejected':
-            onRejected(this.reason);
-            break;
-            default:
-                this.onFulfilled.push(Fulfilled);
-                this.onRejected.push(Rejected);
-        }
-        return this;
+    then(onFulfilled, onRejected) {
+      switch (this.state) {
+        case 'fulfilled':
+          onFulfilled(this.value);
+          break;
+        case 'rejected':
+          onRejected(this.reason);
+          break;
+        default:
+          this.onFulfilled.push(onFulfilled);
+          this.onRejected.push(onRejected);
+      }
+    
+      return this; 
     }
     catch(onRejected) {
         if (this.state === 'rejected') {
@@ -55,15 +56,15 @@ class fakePromise {
 }
 
 
-fakePromise.all = function(promises){
+fakePromise.all = function(promisesArray){
   return new fakePromise((resolve,reject) => {
     let results = [];
     let completed = 0;
-    promises.forEach((value, index) => {
+    promisesArray.forEach((value, index) => {
        fakePromise.resolve(value).then(result =>{
         results[index] = result;
         completed++;
-        if(completed === promises.length){
+        if(completed === promisesArray.length){
           resolve(results);
         }
        }).catch(error => reject(error))
@@ -71,4 +72,21 @@ fakePromise.all = function(promises){
   })
 }
 
+
+fakePromise.allSettled = function(promisesArray){
+const promises = promisesArray.map(promise => {
+  return promise.then(data => {
+    return {
+      value: data,
+      status: 'fulfilled'
+    }
+  }).catch(error => {
+    return {
+      reason: error,
+      status: 'rejected'
+    }
+  })
+})
+return fakePromise.all(promises);
+};
 
